@@ -45,6 +45,18 @@ class PermissionRequest(BaseModel):
     approved: bool | None = None
 
 
+class ApprovalRequest(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
+    task_id: UUID
+    tool_request_id: UUID
+    tool: str = Field(min_length=1)
+    action: str = Field(min_length=1)
+    risk: RiskLevel
+    reason: str = Field(min_length=1)
+    requires_human_approval: bool = True
+    target: str | None = None
+
+
 class ExecutionResult(BaseModel):
     success: bool
     output: Any = None
