@@ -3,7 +3,7 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from marco.contracts.models import ApprovalRequest
+from marco.contracts.models import ApprovalDecision, ApprovalRequest
 
 
 class ApprovalStatus(str):
@@ -18,8 +18,10 @@ class ApprovalRecord(BaseModel):
     status: str = ApprovalStatus.PENDING
 
 
-class ApprovalDecision(BaseModel):
+class DecisionInput(BaseModel):
     approved: bool
+    decided_by: str
+    comment: str | None = None
 
 
 router = APIRouter(prefix="/approvals", tags=["approvals"])
@@ -40,11 +42,11 @@ def get_approval(approval_id: UUID) -> ApprovalRecord:
     return _store[approval_id]
 
 
-@router.post("/{approval_id}/decision", response_model=ApprovalRecord)
+@router.post("/{approval_id}/decision", response_model=ApprovalDecision)
 def decide_approval(
     approval_id: UUID,
-    decision: ApprovalDecision,
-) -> ApprovalRecord:
+    decision: DecisionInput,
+) -> ApprovalDecision:
     record = _store.get(approval_id)
     if record is None:
         raise HTTPException(status_code=404, detail="Approval not found")
@@ -52,4 +54,11 @@ def decide_approval(
     record.status = (
         ApprovalStatus.APPROVED if decision.approved else ApprovalStatus.DENIED
     )
-    return record
+
+    return ApprovalDecision(
+        approval_id=approval_id,
+        approved=decision.approved,
+        decided_by=decision.decided_by,
+        comment=decision.comment,
+    )
+

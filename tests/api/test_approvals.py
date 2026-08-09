@@ -43,11 +43,23 @@ def test_approve_request():
 
     response = client.post(
         f"/approvals/{approval_id}/decision",
-        json={"approved": True},
+        json={
+    "approved": True,
+    "decided_by": "human",
+    "comment": "Approved for execution.",
+    },
     )
 
     assert response.status_code == 200
     assert response.json()["status"] == "approved"
+
+    body = response.json()
+
+    assert response.status_code == 200
+    assert body["approval_id"] == approval_id
+    assert body["approved"] is True
+    assert body["decided_by"] == "human"
+    assert body["comment"] == "Approved for execution."
 
 
 def test_deny_request():
@@ -56,11 +68,23 @@ def test_deny_request():
 
     response = client.post(
         f"/approvals/{approval_id}/decision",
-        json={"approved": False},
+        json={
+    "approved": False,
+    "decided_by": "human",
+    "comment": "Not safe.",
+    },
     )
 
     assert response.status_code == 200
     assert response.json()["status"] == "denied"
+
+    body = response.json()
+
+    assert response.status_code == 200
+    assert body["approval_id"] == approval_id
+    assert body["approved"] is False
+    assert body["decided_by"] == "human"
+    assert body["comment"] == "Not safe."
 
 
 def test_missing_approval_returns_404():
