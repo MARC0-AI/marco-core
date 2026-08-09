@@ -1,3 +1,13 @@
-from marco.permissions.engine import PermissionDecision, PermissionEngine
+from marco.permissions.engine import (
+    PermissionDecision,
+    PermissionEngine,
+    PermissionResult,
+)
+from marco.permissions.reasons import PermissionReason
 
-__all__ = ["PermissionDecision", "PermissionEngine"]
+__all__ = [
+    "PermissionDecision",
+    "PermissionEngine",
+    "PermissionReason",
+    "PermissionResult",
+]
