@@ -56,6 +56,11 @@ class ApprovalRequest(BaseModel):
     requires_human_approval: bool = True
     target: str | None = None
 
+class ApprovalDecision(BaseModel):
+    approval_id: UUID
+    approved: bool
+    decided_by: str = Field(min_length=1)
+    comment: str | None = None
 
 class ExecutionResult(BaseModel):
     success: bool

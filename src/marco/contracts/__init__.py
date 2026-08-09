@@ -1,4 +1,5 @@
 from marco.contracts.models import (
+    ApprovalDecision,
     ApprovalRequest,
     ExecutionResult,
     PermissionRequest,
@@ -9,6 +10,7 @@ from marco.contracts.models import (
 )
 
 __all__ = [
+    "ApprovalDecision",
     "ApprovalRequest",
     "ExecutionResult",
     "PermissionRequest",
