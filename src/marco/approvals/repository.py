@@ -1,7 +1,10 @@
-from typing import Protocol
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Protocol
 from uuid import UUID
 
-from marco.api.approvals import ApprovalRecord
+if TYPE_CHECKING:
+    from marco.api.approvals import ApprovalRecord
 
 
 class ApprovalRepository(Protocol):
