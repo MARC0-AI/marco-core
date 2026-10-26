@@ -3,6 +3,7 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from marco.approvals.repository import InMemoryApprovalRepository
 from marco.contracts.models import ApprovalDecision, ApprovalRequest
 
 
@@ -25,21 +26,21 @@ class DecisionInput(BaseModel):
 
 
 router = APIRouter(prefix="/approvals", tags=["approvals"])
-_store: dict[UUID, ApprovalRecord] = {}
+_repository = InMemoryApprovalRepository()
 
 
 @router.post("", response_model=ApprovalRecord, status_code=201)
 def create_approval(request: ApprovalRequest) -> ApprovalRecord:
     record = ApprovalRecord(id=uuid4(), request=request)
-    _store[record.id] = record
-    return record
+    return _repository.save(record)
 
 
 @router.get("/{approval_id}", response_model=ApprovalRecord)
 def get_approval(approval_id: UUID) -> ApprovalRecord:
-    if approval_id not in _store:
+    record = _repository.get(approval_id)
+    if record is None:
         raise HTTPException(status_code=404, detail="Approval not found")
-    return _store[approval_id]
+    return record
 
 
 @router.post("/{approval_id}/decision", response_model=ApprovalDecision)
@@ -47,13 +48,14 @@ def decide_approval(
     approval_id: UUID,
     decision: DecisionInput,
 ) -> ApprovalDecision:
-    record = _store.get(approval_id)
+    record = _repository.get(approval_id)
     if record is None:
         raise HTTPException(status_code=404, detail="Approval not found")
 
     record.status = (
         ApprovalStatus.APPROVED if decision.approved else ApprovalStatus.DENIED
     )
+    _repository.update(record)
 
     return ApprovalDecision(
         approval_id=approval_id,
@@ -61,4 +63,3 @@ def decide_approval(
         decided_by=decision.decided_by,
         comment=decision.comment,
     )
-
